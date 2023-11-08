@@ -113,6 +113,7 @@ module.exports.getUsers = (req, res, next) => {
 module.exports.getUser = (req, res, next) => {
   User.findById(req.params.userId)
     .select()
+    .populate('basket')
     .orFail()
     .then((user) => res.send(user))
     .catch((err) => validateCatchAll(err, next, ''));

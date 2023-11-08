@@ -35,8 +35,8 @@ const loginUserJoi = celebrate({
 });
 
 const addToBasketJoi = celebrate({
-  params: Joi.object().keys({
-    id: Joi.string().required().hex().length(24),
+ params: Joi.object().keys({
+    cardId: Joi.string().required().hex().length(24),
   }),
 });
 
