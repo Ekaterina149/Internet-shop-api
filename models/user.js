@@ -59,7 +59,7 @@ const userSchema = new mongoose.Schema(
       default: false,
     },
     phone: {
-      type: Number,
+      type: String,
       required: [true, 'поле "phone" не может быть пустым'],
     },
   },

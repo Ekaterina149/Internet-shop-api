@@ -167,27 +167,32 @@ module.exports.verifyUser = (req, res, next) => User.findOne({ _id: req.params.i
   })
   .catch((err) => validateCatchAll(err, next, 'Переданы некорректные данные верификации'));
 
-module.exports.updateUser = (req, res, next) => {
-  const { name, email } = req.body;
+  module.exports.updateUser = (req, res, next) => {
 
-  User.findByIdAndUpdate(
-    req.user._id,
-    { name, email },
-    { new: true, runValidators: true },
-  )
-    .orFail()
-    .then((user) => res.send(user))
-    .catch((err) => validateCatchAll(
-      err,
-      next,
-      'Переданы некорректные данные при обновлении профиля',
-    ));
-};
+
+        const { name, email, phone, customerName, customerFathersName, customerSurName } = req.body;
+
+        // Возврат User.findByIdAndUpdate, чтобы он стал частью цепочки промисов
+         User.findByIdAndUpdate(
+          req.user._id,
+          { name, email, phone, customerName, customerFathersName, customerSurName, },
+          { new: true, runValidators: true },
+        )
+        .orFail() // Метод orFail должен быть вызван после User.findByIdAndUpdate и возвращать промис
+
+      .then((user) => res.send(user))
+      .catch((err) => validateCatchAll(
+        err,
+        next,
+        'Переданы некорректные данные при обновлении профиля',
+      ));
+  };
 
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   User.findOne({ email })
     .select('+password')
+    .populate('basket')
     .then((user) => {
       if (!user) {
         return next(new AuthError('Неправильные почта или пароль'));
@@ -254,7 +259,7 @@ module.exports.addToBasket = (req, res, next) => {
         req.user._id,
         { $push: { basket: req.params.cardId } },
         { new: true },
-      );
+      ).populate('basket')
     })
     .then((user) => {
       console.log('a', user);
@@ -276,36 +281,41 @@ module.exports.addToBasket = (req, res, next) => {
 };
 
 module.exports.deleteFromBasket = (req, res, next) => {
+
   User.findById(
     req.user._id,
 
   )
     .orFail()
     .then((user) => {
+      debugger;
+      console.log(user.basket);
       if (user.basket.indexOf(req.params.cardId) !== -1) {
         user.basket.splice(user.basket.indexOf(req.params.cardId), 1);
         return user.save();
       } throw new NotFoundError('Карточка не найдена в корзине');
     })
     .then((newUser) => {
-      res.status(HTTP_STATUS_OK).send(newUser);
+      return User.populate(newUser, { path: 'basket' })
+    })
+    .then((populatedUser) => {
+      res.status(HTTP_STATUS_OK).send(populatedUser);
       return Card.findById(req.params.cardId);
     })
     .then((card) => {
       if (card) {
-        // eslint-disable-next-line no-param-reassign, no-return-assign
         card.amount += 1;
         return card.save();
-      } throw new NotFoundError('Карточка не найдена в базе');
+      }
+      throw new NotFoundError('Карточка не найдена в базе');
     })
-
+    .then(() => {
+      // Выполнение дополнительных действий при успешном результате
+    })
     .catch((err) => {
       if (err.name === 'NotFoundError') {
         return next(new NotFoundError(err.message));
       }
-      // if (err.name === 'CastError') {
-      //   return next(new BadRequestError('Переданы некорректные данные при удалении товара из корзины'));
-      // }
       return next(err);
     });
 };
@@ -335,7 +345,8 @@ module.exports.updateBasket = (req, res, next) => {
             req.user._id,
             { $push: { basket: { $each: updatedBasket } } },
             { new: true },
-          ),
+          ).populate('basket')
+          ,
           cardsZeroAmount,
         ]);
       })
@@ -363,6 +374,45 @@ module.exports.updateBasket = (req, res, next) => {
         return next(err);
       });
   }
+};
+
+module.exports.deleteSeveralFromBasket = (req, res, next) => {
+  const {basket} = req.body;
+  const uniqueArray = [...new Set(basket)];
+   const cardId = uniqueArray[0];
+   console.log(uniqueArray);
+  User.findById(req.user._id)
+    .orFail()
+    .then((user) => {
+      if (user.basket.includes(cardId)) {
+        user.basket.pull(cardId);
+        return user.save();
+      }
+      throw new NotFoundError('Карточка не найдена в корзине');
+    })
+    .then((newUser) => {
+      return User.populate(newUser, { path: 'basket' })
+    })
+    .then((populatedUser) => {
+      res.status(HTTP_STATUS_OK).send(populatedUser);
+      return Card.findById(cardId);
+    })
+    .then((card) => {
+      if (card) {
+        card.amount = card.amount + basket.length;
+        return card.save();
+      }
+      throw new NotFoundError('Карточка не найдена в базе');
+    })
+    .then(() => {
+      // Выполнение дополнительных действий при успешном результате
+    })
+    .catch((err) => {
+      if (err.name === 'NotFoundError') {
+        return next(new NotFoundError(err.message));
+      }
+      return next(err);
+    });
 };
 
 module.exports.clearBasket = (req, res, next) => {
@@ -406,4 +456,44 @@ module.exports.clearBasket = (req, res, next) => {
       }
       return next(err);
     });
+};
+
+module.exports.changePassword = (req, res, next) => {
+  const { password, newPassword } = req.body;
+  User.findById(req.user._id)
+    .select('+password')
+    .populate('basket')
+    .then((user) => {
+      // if (!user) {
+      //   return next(new AuthError('Неправильные почта или пароль'));
+      // }
+      // if (!user.verified) {
+      //   return next(new ForbiddenError('Зайдите на Вашу электронную почту и подтвердите ВАш аккаунт'));
+      // }
+
+      return bcrypt.compare(password, user.password)
+      .then((matched) => {
+        if (!matched) {
+          return next(new AuthError('Ваш прежний пароль введен неправильно'));
+        }
+
+         return Promise.all([
+          user
+          ,
+          bcrypt.hash(newPassword, 12),
+        ])
+        .then(([user, newHash]) =>{
+          console.log('newHash', newHash)
+          user.password = newHash;
+          return user.save();
+        })
+        .then((userWithNewPassword)=>
+        res.status(HTTP_STATUS_OK).send(userWithNewPassword)
+        )
+
+
+
+      })
+    })
+    .catch((err) => next(err));
 };

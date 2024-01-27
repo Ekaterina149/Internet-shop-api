@@ -12,7 +12,7 @@ const app = express();
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const { handleErrors } = require('./middlewares/handleErrors');
 
-const { PORT = 3000, MONGO_URL = 'mongodb://127.0.0.1/wickershopdb' } = process.env;
+const { PORT = 3001, MONGO_URL = 'mongodb://127.0.0.1/wickershopdb' } = process.env;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));

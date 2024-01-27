@@ -10,7 +10,7 @@ const createUserJoi = celebrate({
     customerName: Joi.string().required().trim(),
     customerSurName: Joi.string().required().trim(),
     customerFathersName: Joi.string().required().trim(),
-    phone: Joi.number().integer().required(),
+    phone: Joi.string().required(),
   }),
 });
 
@@ -24,6 +24,10 @@ const updateUserJoi = celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().trim(),
     email: Joi.string().required().email(),
+    customerName: Joi.string().required().trim(),
+    customerSurName: Joi.string().required().trim(),
+    customerFathersName: Joi.string().required().trim(),
+    phone: Joi.string().required(),
   }),
 });
 
@@ -94,6 +98,13 @@ const deleteCardJoi = celebrate({
   }),
 });
 
+const changePasswordJoi = celebrate({
+  body: Joi.object().keys({
+    password: Joi.string().required(),
+    newPassword: Joi.string().required(),
+  }),
+});
+
 module.exports = {
   createUserJoi,
   loginUserJoi,
@@ -105,4 +116,5 @@ module.exports = {
   repeatOrderJoi,
   createCardJoi,
   deleteCardJoi,
+  changePasswordJoi,
 };

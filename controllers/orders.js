@@ -91,20 +91,27 @@ function formMessageText(order, user, word) {
     articleNumber: element.articleNumber,
     price: element.price,
     id: element._id.toString(),
-  }));
-  const array = transformedArray.reduce((acc, curr) => {
-    const existingItem = acc.find((item) => item.id === curr.id);
-    if (existingItem) {
-      // eslint-disable-next-line no-plusplus
-      existingItem.quantity++;
-    } else {
-      acc.push({ ...curr, quantity: 1 });
-    }
-    return acc;
-  }, []);
-  console.log('array', array);
+  })).reduce(
+    (acc , curr) => {
+      const existingIndex = acc.findIndex((item) => item._id === curr._id);
+      if (existingIndex !== -1) {
+        acc[existingIndex] = {
+          ...curr,
+          quantity: acc[existingIndex].quantity + 1,
+        };
+      } else {
+        acc.push({ ...curr, quantity: 1 });
+      }
+      return acc;
+    },
+    []
+  );
 
-  const arrayItems = array.map((item) => `<li>
+
+
+  console.log('array', transformedArray);
+
+  const arrayItems = transformedArray.map((item) => `<li>
     <p>Название продукта: ${item.productName}</p>
     <p>Описание: ${item.description}</p>
     <p>Артикул: ${item.articleNumber}</p>
@@ -112,11 +119,11 @@ function formMessageText(order, user, word) {
     <p>Количество: ${item.quantity}</p>
   </li>`).join('');
   // eslint-disable-next-line max-len
-  const summPrice = array.reduce((sum, currentItem) => sum + (currentItem.price * currentItem.quantity), 0);
+  const summPrice = transformedArray.reduce((sum, currentItem) => sum + (currentItem.price * currentItem.quantity), 0);
   console.log('summPrice', summPrice);
   console.log('arrayItems', arrayItems);
   const message = {
-    to: '<yrkova_ea@inbox.ru>',
+    to: `<${user.email}>`,
     subject: `${word} заказ пользователя ${user.customerSurName} ${user.customerName} ${user.customerFathersName}  № ${order._id} оформлен`,
     html: `
     <h2>Информация о заказе № ${order._id}</h2>
@@ -173,8 +180,8 @@ module.exports.createOrder = (req, res, next) => {
       { new: true },
     ), order]))
     .then(([user, order]) => {
-      const message = formMessageText(order, user, 'Новый');
-      mailer(message);
+       const message = formMessageText(order, user, 'Новый');
+       mailer(message);
       return res.status(HTTP_STATUS_OK).send(order);
     })
     .catch((err) => {
