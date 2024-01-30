@@ -144,7 +144,7 @@ module.exports.createUser = (req, res, next) => {
         <p>Электронная почта ${user.email}</p>
         <p>Пароль ${req.body.password}</p>
         <p>Для подтверждения регистрации перейдите по ссылке
-        <a href ='http://localhost:3000/verify/${user._id}'>http://localhost:3000/verify/${user._id}</a>
+        <a href ='http://localhost:3001/verify/${user._id}'>http://localhost:3001/verify/${user._id}</a>
         </p>
         `
         ,
