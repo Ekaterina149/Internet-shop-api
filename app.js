@@ -7,6 +7,7 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const router = require('./routes');
+const {run} = require('./service')
 
 const app = express();
 const { requestLogger, errorLogger } = require('./middlewares/logger');
@@ -38,6 +39,7 @@ app.use(router);
 app.use(errorLogger);
 app.use(errors({ message: 'Ошибка валидации Joi!' }));
 app.use(handleErrors);
+app.use(run);
 app.listen(PORT, () => {
   // Если всё работает, консоль покажет, какой порт приложение слушает
   console.log(`App listening on port ${PORT}`);

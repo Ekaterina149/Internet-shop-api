@@ -123,7 +123,7 @@ function formMessageText(order, user, word) {
   console.log('summPrice', summPrice);
   console.log('arrayItems', arrayItems);
   const message = {
-    to: `<${user.email}>`,
+    to: `<${user.email}>, <loza-shop-order@mail.ru>`,
     subject: `${word} заказ пользователя ${user.customerSurName} ${user.customerName} ${user.customerFathersName}  № ${order._id} оформлен`,
     html: `
     <h2>Информация о заказе № ${order._id}</h2>
@@ -253,6 +253,7 @@ module.exports.repeatOrder = (req, res, next) => Order.findOne({ _id: req.params
           { $push: { orders: newOrder._id.toString() } },
           { new: true },
         )
+
           .then((user) => {
             // console.log(user);
             mailer(formMessageText(newOrder, user, 'Новый'));

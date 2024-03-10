@@ -62,6 +62,9 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, 'поле "phone" не может быть пустым'],
     },
+    addTobasketTime: {
+       type: Date
+    }
   },
   {
     versionKey: false,
