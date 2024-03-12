@@ -13,7 +13,7 @@ const app = express();
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const { handleErrors } = require('./middlewares/handleErrors');
 
-const { PORT = 3001, MONGO_URL = 'mongodb://127.0.0.1/wickershopdb' } = process.env;
+const { PORT = 3001, NODE_ENV, MONGO_URL = 'mongodb://127.0.0.1/wickershopdb' } = process.env;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -35,12 +35,13 @@ app.use(
   }),
 );
 // корневой роут
-app.use(router);
+app.use('/api', router);
 app.use(errorLogger);
 app.use(errors({ message: 'Ошибка валидации Joi!' }));
 app.use(handleErrors);
 app.use(run);
 app.listen(PORT, () => {
   // Если всё работает, консоль покажет, какой порт приложение слушает
-  console.log(`App listening on port ${PORT}`);
+  console.log(`App listening on port ${PORT} ${NODE_ENV}`);
+
 });

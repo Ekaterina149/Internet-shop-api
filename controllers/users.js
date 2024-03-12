@@ -1,4 +1,4 @@
-const { NODE_ENV, JWT_SECRET } = process.env;
+const { NODE_ENV, JWT_SECRET, DOMAIN_NAME } = process.env;
 const httpConstants = require("http2").constants;
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -162,7 +162,7 @@ module.exports.createUser = (req, res, next) => {
         <p>Электронная почта ${user.email}</p>
         <p>Пароль ${req.body.password}</p>
         <p>Для подтверждения регистрации перейдите по ссылке
-        <a href ='http://localhost:3001/verify/${user._id}'>http://localhost:3001/verify/${user._id}</a>
+        <a href ='${DOMAIN_NAME}/api/verify/${user._id}'>${DOMAIN_NAME}/api/verify/${user._id}</a>
         </p>
         `,
       };
