@@ -21,16 +21,7 @@ const cardSchema = new mongoose.Schema(
     pictureBig: {
       type: [{
         type: String,
-        validate: {
-          validator(v) {
-            return validator.isURL(v, {
-              require_protocol: true,
-              require_valid_protocol: true,
-              require_host: true,
-            });
-          },
-          message: 'Введите корректную ссылку на картинку товара',
-        },
+
         required: [true, 'поле "pictureBig" не может быть пустым'],
       },
 
@@ -38,16 +29,7 @@ const cardSchema = new mongoose.Schema(
     },
     pictureSmall: {
       type: String,
-      validate: {
-        validator(v) {
-          return validator.isURL(v, {
-            require_protocol: true,
-            require_valid_protocol: true,
-            require_host: true,
-          });
-        },
-        message: 'Введите корректную ссылку на картинку-малышку товара',
-      },
+
       required: [true, 'поле "pictureSmall" не может быть пустым'],
 
     },
